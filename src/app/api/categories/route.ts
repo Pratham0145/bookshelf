@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { initializeDatabase } from "@/lib/init-db";
 
 // GET - Fetch all categories
 export async function GET() {
   try {
+    // Try to initialize database on first request
+    await initializeDatabase();
+    
     const categories = await db.category.findMany({
       include: {
         _count: {
@@ -15,7 +19,7 @@ export async function GET() {
     return NextResponse.json(categories);
   } catch (error) {
     console.error("Error fetching categories:", error);
-    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch categories", details: String(error) }, { status: 500 });
   }
 }
 

@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { initializeDatabase } from "@/lib/init-db";
 
 // GET - Fetch all public books or user's books
 export async function GET(request: NextRequest) {
   try {
+    // Try to initialize database on first request
+    await initializeDatabase();
+    
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
     const category = searchParams.get("category");
@@ -24,7 +28,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(book);
     }
 
-    const where: any = {};
+    const where: Record<string, unknown> = {};
 
     if (userId) {
       where.authorId = userId;
@@ -38,9 +42,9 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       where.OR = [
-        { title: { contains: search } },
-        { author: { contains: search } },
-        { description: { contains: search } },
+        { title: { contains: search, mode: "insensitive" } },
+        { author: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
       ];
     }
 
@@ -57,7 +61,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(books);
   } catch (error) {
     console.error("Error fetching books:", error);
-    return NextResponse.json({ error: "Failed to fetch books" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch books", details: String(error) }, { status: 500 });
   }
 }
 
