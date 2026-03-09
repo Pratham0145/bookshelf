@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -108,12 +108,12 @@ export default function BookPlatform() {
     signIn('google', { callbackUrl: '/' });
   }, []);
 
-  // Fetch books
-  const fetchBooks = useCallback(async () => {
+  // Fetch books - fetches based on current searchQuery and selectedCategory
+  const fetchBooks = useCallback(async (search?: string, category?: string) => {
     try {
       const params = new URLSearchParams();
-      if (searchQuery) params.append("search", searchQuery);
-      if (selectedCategory !== "all") params.append("category", selectedCategory);
+      if (search) params.append("search", search);
+      if (category && category !== "all") params.append("category", category);
 
       const response = await fetch(`/api/books?${params}`);
       const data = await response.json();
@@ -121,7 +121,7 @@ export default function BookPlatform() {
     } catch (error) {
       toast.error("Failed to fetch books");
     }
-  }, [searchQuery, selectedCategory]);
+  }, []);
 
   // Fetch user's books
   const fetchMyBooks = useCallback(async () => {
@@ -161,7 +161,17 @@ export default function BookPlatform() {
   useEffect(() => {
     fetchBooks();
     fetchCategories();
-  }, [fetchBooks, fetchCategories]);
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Debounced search effect - triggers when search or category changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchBooks(searchQuery, selectedCategory);
+    }, 300); // 300ms debounce
+    return () => clearTimeout(timer);
+  }, [searchQuery, selectedCategory, fetchBooks]);
 
   useEffect(() => {
     if (session?.user?.id) {
