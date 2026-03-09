@@ -3,11 +3,19 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
 
+// Always use production URL for OAuth redirect
+const PRODUCTION_URL = "https://bookshelf-app.vercel.app";
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          redirect_uri: `${PRODUCTION_URL}/api/auth/callback/google`,
+        },
+      },
     }),
   ],
   session: {
