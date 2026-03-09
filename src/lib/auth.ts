@@ -3,8 +3,8 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
 
-// Use the external URL for production - ALWAYS use external URL
-const BASE_URL = process.env.NEXTAUTH_URL || "https://n1tzy1zy7eh0-d.space.z.ai";
+// Use the production URL
+const BASE_URL = process.env.NEXTAUTH_URL || "https://bookshelf-app.vercel.app";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -23,7 +23,7 @@ export const authOptions: NextAuthOptions = {
       token: {
         url: "https://oauth2.googleapis.com/token",
         async request(context) {
-          const { provider, params, checks } = context;
+          const { provider, params } = context;
           
           // Exchange code for tokens with explicit redirect_uri
           const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {

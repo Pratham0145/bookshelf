@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -72,8 +72,13 @@ interface UserStats {
   currentlyReading: number;
 }
 
-// External URL for OAuth callbacks
-const EXTERNAL_URL = "https://n1tzy1zy7eh0-d.space.z.ai";
+// External URL for OAuth callbacks - use window.location.origin for dynamic URL
+const getExternalUrl = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return 'https://bookshelf-app.vercel.app';
+};
 
 export default function BookPlatform() {
   const { data: session, status } = useSession();
@@ -105,31 +110,11 @@ export default function BookPlatform() {
   });
   const [isUploading, setIsUploading] = useState(false);
 
-  // Custom Google Login function with explicit redirect_uri
+  // Use NextAuth signIn for Google login
   const handleGoogleLogin = useCallback(() => {
-    // Build Google OAuth URL with explicit redirect_uri
-    const clientId = "889359009135-klpgpoduaikrv1mbccvbhd60sgr2n2qd.apps.googleusercontent.com";
-    const redirectUri = `${EXTERNAL_URL}/api/auth/callback/google`;
-    const scope = "openid email profile";
-    
-    const googleAuthUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-    googleAuthUrl.searchParams.set("client_id", clientId);
-    googleAuthUrl.searchParams.set("redirect_uri", redirectUri);
-    googleAuthUrl.searchParams.set("scope", scope);
-    googleAuthUrl.searchParams.set("response_type", "code");
-    googleAuthUrl.searchParams.set("prompt", "select_account");
-    googleAuthUrl.searchParams.set("access_type", "offline");
-    
-    // Generate random state for security
-    const state = Math.random().toString(36).substring(2, 15);
-    googleAuthUrl.searchParams.set("state", state);
-    
-    // Store state in sessionStorage for verification
-    sessionStorage.setItem("oauth_state", state);
-    
-    // Redirect to Google
-    window.location.href = googleAuthUrl.toString();
-  }, [EXTERNAL_URL]);
+    // Use NextAuth's built-in signIn which will use the correct redirect_uri
+    signIn('google', { callbackUrl: '/' });
+  }, []);
 
   // Fetch books
   const fetchBooks = useCallback(async () => {
