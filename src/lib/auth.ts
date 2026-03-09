@@ -3,55 +3,11 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
 
-// Use the production URL
-const BASE_URL = process.env.NEXTAUTH_URL || "https://bookshelf-app.vercel.app";
-
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      authorization: {
-        params: {
-          scope: "openid email profile",
-          prompt: "select_account",
-          access_type: "offline",
-          redirect_uri: `${BASE_URL}/api/auth/callback/google`,
-        },
-      },
-      // Override the token endpoint to use correct redirect_uri
-      token: {
-        url: "https://oauth2.googleapis.com/token",
-        async request(context) {
-          const { provider, params } = context;
-          
-          // Exchange code for tokens with explicit redirect_uri
-          const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({
-              code: params.code as string,
-              client_id: provider.clientId as string,
-              client_secret: provider.clientSecret as string,
-              redirect_uri: `${BASE_URL}/api/auth/callback/google`,
-              grant_type: "authorization_code",
-            }),
-          });
-
-          if (!tokenResponse.ok) {
-            const error = await tokenResponse.text();
-            console.error("[Google Token Exchange] Failed:", error);
-            throw new Error("Failed to exchange token");
-          }
-
-          const tokens = await tokenResponse.json();
-          
-          return { tokens };
-        },
-      },
-      userinfo: {
-        url: "https://www.googleapis.com/oauth2/v2/userinfo",
-      },
     }),
   ],
   session: {
@@ -105,19 +61,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   debug: true,
-  // Force the correct URL
-  useSecureCookies: true,
-  cookies: {
-    sessionToken: {
-      name: `next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: true,
-      },
-    },
-  },
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 declare module "next-auth" {

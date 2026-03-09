@@ -72,14 +72,6 @@ interface UserStats {
   currentlyReading: number;
 }
 
-// External URL for OAuth callbacks - use window.location.origin for dynamic URL
-const getExternalUrl = () => {
-  if (typeof window !== 'undefined') {
-    return window.location.origin;
-  }
-  return 'https://bookshelf-app.vercel.app';
-};
-
 export default function BookPlatform() {
   const { data: session, status } = useSession();
   const [currentView, setCurrentView] = useState<"home" | "browse" | "dashboard" | "profile">("home");
