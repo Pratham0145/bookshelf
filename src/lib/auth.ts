@@ -3,8 +3,8 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
 
-// Always use production URL for OAuth redirect
-const PRODUCTION_URL = "https://bookshelf-app.vercel.app";
+// Use NEXTAUTH_URL from environment for production URL
+const PRODUCTION_URL = process.env.NEXTAUTH_URL || "https://bookshelf-app.vercel.app";
 
 export const authOptions: NextAuthOptions = {
   providers: [
