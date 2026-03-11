@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  role          String    @default("user")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  books         Book[]
+  readingProgress ReadingProgress[]
+  notifications Notification[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  books       Book[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Book {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  author        String
+  authorId      String
+  coverImage    String?
+  pdfUrl        String
+  pages         Int      @default(0)
+  category      String
+  categoryId    String?
+  tags          String?
+  isPublic      Boolean  @default(true)
+  downloadCount Int      @default(0)
+  viewCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categoryRel   Category? @relation(fields: [categoryId], references: [id])
+  readingProgress ReadingProgress[]
+}
+
+model ReadingProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  bookId      String
+  currentPage Int      @default(1)
+  lastReadAt  DateTime @default(now())
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book        Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, bookId])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  message     String
+  type        String   @default("info")
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
