@@ -550,7 +550,7 @@ export default function BookPlatform() {
   };
 
   // Upload Modal
-  const UploadModal = () => (
+  const UploadModalContent = () => (
     <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -567,7 +567,7 @@ export default function BookPlatform() {
               id="title"
               placeholder="Enter book title"
               value={uploadForm.title}
-              onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
+              onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
             />
           </div>
 
@@ -577,7 +577,7 @@ export default function BookPlatform() {
               id="author"
               placeholder="Enter author name"
               value={uploadForm.author}
-              onChange={(e) => setUploadForm({ ...uploadForm, author: e.target.value })}
+              onChange={(e) => setUploadForm(prev => ({ ...prev, author: e.target.value }))}
             />
           </div>
 
@@ -587,7 +587,7 @@ export default function BookPlatform() {
               id="description"
               placeholder="Enter book description"
               value={uploadForm.description}
-              onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
+              onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
               rows={3}
             />
           </div>
@@ -597,7 +597,7 @@ export default function BookPlatform() {
               <Label htmlFor="category">Category</Label>
               <Select
                 value={uploadForm.category}
-                onValueChange={(value) => setUploadForm({ ...uploadForm, category: value })}
+                onValueChange={(value) => setUploadForm(prev => ({ ...prev, category: value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
@@ -619,7 +619,7 @@ export default function BookPlatform() {
               <Label htmlFor="visibility">Visibility</Label>
               <Select
                 value={uploadForm.isPublic ? "public" : "private"}
-                onValueChange={(value) => setUploadForm({ ...uploadForm, isPublic: value === "public" })}
+                onValueChange={(value) => setUploadForm(prev => ({ ...prev, isPublic: value === "public" }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select visibility" />
@@ -648,7 +648,7 @@ export default function BookPlatform() {
               id="tags"
               placeholder="e.g., programming, technology, guide"
               value={uploadForm.tags}
-              onChange={(e) => setUploadForm({ ...uploadForm, tags: e.target.value })}
+              onChange={(e) => setUploadForm(prev => ({ ...prev, tags: e.target.value }))}
             />
           </div>
 
@@ -659,7 +659,7 @@ export default function BookPlatform() {
                 id="cover"
                 type="file"
                 accept="image/*"
-                onChange={(e) => setUploadForm({ ...uploadForm, coverImage: e.target.files?.[0] || null })}
+                onChange={(e) => setUploadForm(prev => ({ ...prev, coverImage: e.target.files?.[0] || null }))}
                 className="w-full"
               />
               {uploadForm.coverImage && (
@@ -675,7 +675,7 @@ export default function BookPlatform() {
                 id="pdf"
                 type="file"
                 accept=".pdf"
-                onChange={(e) => setUploadForm({ ...uploadForm, pdfFile: e.target.files?.[0] || null })}
+                onChange={(e) => setUploadForm(prev => ({ ...prev, pdfFile: e.target.files?.[0] || null }))}
                 className="w-full"
               />
               {uploadForm.pdfFile && (
@@ -1228,7 +1228,7 @@ export default function BookPlatform() {
       </main>
 
       {!isReading && <Footer />}
-      <UploadModal />
+      <UploadModalContent />
     </div>
   );
 }
